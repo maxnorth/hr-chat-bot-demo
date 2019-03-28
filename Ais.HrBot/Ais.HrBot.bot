@@ -1,0 +1,28 @@
+{
+    "name": "Ais.HrBot",
+    "description": "",
+    "services": [
+        {
+            "type": "endpoint",
+            "appId": "",
+            "appPassword": "",
+            "endpoint": "http://localhost:5000/api/messages",
+            "id": "2270da70-49cf-11e9-9e5c-2d41c696d712",
+            "name": "Ais.HrBot"
+        },
+        {
+            "type": "luis",
+            "id": "34",
+            "name": "LuisModel",
+            "appId": "",
+            "authoringKey": "",
+            "region": "",
+            "subscriptionKey": "",
+            "version": "0.1"
+        }
+    ],
+    "padlock": "",
+    "version": "2.0",
+    "overrides": null,
+    "path": "C:\\Users\\maxwe\\Documents\\Projects\\dotnet\\bot-framework-tour\\app\\Ais.HrBot\\Ais.HrBot.bot"
+}
