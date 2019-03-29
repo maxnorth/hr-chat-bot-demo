@@ -42,12 +42,13 @@ namespace HrBot
                 DatabaseId = cosmosDbService.Database,
                 CollectionId = cosmosDbService.Collection
             });
- 
+
             var state = new ConversationState(storage);
             services.AddSingleton(state);
-            services.AddSingleton(storage);
 
-            services.AddBot<HrBot>();
+            services.AddBot<HrBot>(options => {
+                options.Middleware.Add(new AutoSaveStateMiddleware());
+            });
             
             services.AddBotApplicationInsights(botConfig);
             

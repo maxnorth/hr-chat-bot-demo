@@ -3,7 +3,7 @@ using System.Linq;
 using Microsoft.Bot.Builder;
 using Microsoft.Bot.Builder.AI.QnA;
 
-namespace HrBot {
+namespace HrBot.Extensions {
 
     public static class TelemetryExtensions {
 
@@ -25,6 +25,13 @@ namespace HrBot {
                 ["MessageContent"] = message,
                 ["TopIntent"] = topIntent,
                 ["TopIntentScore"] = topIntentScore.ToString()
+            });
+        }
+                
+        public static void TrackUnassistedMessageEvent(this IBotTelemetryClient telemetryClient, string message) 
+        {
+            telemetryClient.TrackEvent("UnassistedMessage", new Dictionary<string, string> {
+                ["MessageContent"] = message
             });
         }
     }

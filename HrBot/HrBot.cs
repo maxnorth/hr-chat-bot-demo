@@ -7,8 +7,9 @@ using Microsoft.Bot.Builder;
 using Microsoft.Bot.Builder.AI.Luis;
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Schema;
-using HrBot.Dialogs;
 using Microsoft.Bot.Builder.AI.QnA;
+using HrBot.Dialogs;
+using HrBot.Extensions;
 
 namespace HrBot
 {
@@ -31,19 +32,22 @@ namespace HrBot
             _qnaMaker = qnaMaker;
             _telemetryClient = telemetryClient;
 
-            _dialogSet = new DialogSet(conversationState.CreateProperty<DialogState>(nameof(ChangePhoneNumberDialog)));            
+            _dialogSet = new DialogSet(conversationState.CreateProperty<DialogState>("HrBotDialogState"));            
             _dialogSet.Add(new ChangePhoneNumberDialog());
             _dialogSet.Add(new PhoneNumberPrompt());
+            _dialogSet.Add(new ContactHrDialog());
             _dialogSet.Add(GenericPrompts.TextPrompt);
-            _dialogSet.Add(GenericPrompts.NumberPrompt);
+            _dialogSet.Add(GenericPrompts.IntegerPrompt);
             _dialogSet.Add(GenericPrompts.ChoicePrompt);
+            _dialogSet.Add(GenericPrompts.ConfirmPrompt);
         }
 
         public async Task OnTurnAsync(ITurnContext turnContext, CancellationToken cancellationToken = default(CancellationToken))
         {
             if (turnContext.Activity.Type == ActivityTypes.Message)
             {        
-                var dialogContext = await _dialogSet.CreateContextAsync(turnContext, cancellationToken);
+                // check for active dialog and continue if exists
+                var dialogContext = await _dialogSet.CreateContextAsync(turnContext);
 
                 var dialogTurnResult = await dialogContext.ContinueDialogAsync(cancellationToken);
 
@@ -53,25 +57,23 @@ namespace HrBot
                     return;
                 }
 
+                // no active dialog. check user's message for specific intent
                 var luisResult = await _luisRecognizer.RecognizeAsync(turnContext, cancellationToken);
                 
                 _telemetryClient.TrackLuisEvent(turnContext.Activity.Text, luisResult);
 
                 var (intent, intentScore) = luisResult.GetTopScoringIntent();
 
-                if (intentScore > .60)
+                if (intentScore > .70)
                 {
                     if (intent == LuisIntentConstants.ChangePhoneNumber)
                     {
                         await dialogContext.BeginDialogAsync(ChangePhoneNumberDialog.Id, cancellationToken);
                         return;
                     }
-
-                    // try qna
-
-                    // else offer to speak to a human
                 }
                 
+                // if no intent recognized, see if message matches QnA supported inquiry
                 var qnaResults = await _qnaMaker.GetAnswersAsync(turnContext);
 
                 _telemetryClient.TrackQnAMakerEvent(turnContext.Activity.Text, qnaResults);
@@ -80,6 +82,11 @@ namespace HrBot
                     await turnContext.SendActivityAsync(qnaResults.First().Answer);
                     return;
                 }
+
+                // else acknowledge failure to recognize message
+                _telemetryClient.TrackUnassistedMessageEvent(turnContext.Activity.Text);
+                await dialogContext.BeginDialogAsync(ContactHrDialog.Id, cancellationToken);
+                return;
             }
         }
     }
