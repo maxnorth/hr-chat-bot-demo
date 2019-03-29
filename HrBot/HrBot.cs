@@ -12,7 +12,7 @@ using Microsoft.Bot.Builder.AI.QnA;
 
 namespace HrBot
 {
-    public class MyBot : IBot
+    public class HrBot : IBot
     {
         private readonly ConversationState _conversationState;
         private readonly DialogSet _dialogSet;
@@ -20,7 +20,7 @@ namespace HrBot
         private readonly QnAMaker _qnaMaker;
         private readonly IBotTelemetryClient _telemetryClient;
 
-        public MyBot(
+        public HrBot(
             ConversationState conversationState, 
             LuisRecognizer luisRecognizer, 
             QnAMaker qnaMaker,
@@ -31,24 +31,25 @@ namespace HrBot
             _qnaMaker = qnaMaker;
             _telemetryClient = telemetryClient;
 
-            _dialogSet = new DialogSet(conversationState.CreateProperty<DialogState>("MyDialogState"));            
-            _dialogSet.Add(new MyWaterfallDialog());
-            _dialogSet.Add(new TextPrompt("AskTextValue"));
-            _dialogSet.Add(new NumberPrompt<int>("AskIntValue"));
-            _dialogSet.Add(new ChoicePrompt("AskChoice"));
+            _dialogSet = new DialogSet(conversationState.CreateProperty<DialogState>(nameof(ChangePhoneNumberDialog)));            
+            _dialogSet.Add(new ChangePhoneNumberDialog());
+            _dialogSet.Add(new PhoneNumberPrompt());
+            _dialogSet.Add(GenericPrompts.TextPrompt);
+            _dialogSet.Add(GenericPrompts.NumberPrompt);
+            _dialogSet.Add(GenericPrompts.ChoicePrompt);
         }
 
         public async Task OnTurnAsync(ITurnContext turnContext, CancellationToken cancellationToken = default(CancellationToken))
         {
-
             if (turnContext.Activity.Type == ActivityTypes.Message)
-            {
-                var qnaResults = await _qnaMaker.GetAnswersAsync(turnContext);
+            {        
+                var dialogContext = await _dialogSet.CreateContextAsync(turnContext, cancellationToken);
 
-                _telemetryClient.TrackQnAMakerEvent(turnContext.Activity.Text, qnaResults);
+                var dialogTurnResult = await dialogContext.ContinueDialogAsync(cancellationToken);
 
-                if (qnaResults.Any()) {
-                    await turnContext.SendActivityAsync(qnaResults.First().Answer);
+                if (dialogTurnResult.Status == DialogTurnStatus.Waiting)
+                {
+                    // actively engaged in dialog, wait for response
                     return;
                 }
 
@@ -58,28 +59,26 @@ namespace HrBot
 
                 var (intent, intentScore) = luisResult.GetTopScoringIntent();
 
-                if (intentScore > .70)
+                if (intentScore > .60)
                 {
-                    if (intent == "Help")
+                    if (intent == LuisIntentConstants.ChangePhoneNumber)
                     {
-                        await turnContext.SendActivityAsync("Sorry, I'm not very helpful.");
+                        await dialogContext.BeginDialogAsync(ChangePhoneNumberDialog.Id, cancellationToken);
                         return;
                     }
 
-                    if (intent == "Rate")
-                    {
-                        await turnContext.SendActivityAsync(";)");
-                        return;
-                    }
+                    // try qna
+
+                    // else offer to speak to a human
                 }
+                
+                var qnaResults = await _qnaMaker.GetAnswersAsync(turnContext);
 
-                var dialogContext = await _dialogSet.CreateContextAsync(turnContext, cancellationToken);
+                _telemetryClient.TrackQnAMakerEvent(turnContext.Activity.Text, qnaResults);
 
-                var dialogTurnResult = await dialogContext.ContinueDialogAsync(cancellationToken);
-
-                if (dialogTurnResult.Status == DialogTurnStatus.Empty)
-                {
-                    await dialogContext.BeginDialogAsync(MyWaterfallDialog.Id, cancellationToken);
+                if (qnaResults.Any()) {
+                    await turnContext.SendActivityAsync(qnaResults.First().Answer);
+                    return;
                 }
             }
         }

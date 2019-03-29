@@ -45,10 +45,9 @@ namespace HrBot
  
             var state = new ConversationState(storage);
             services.AddSingleton(state);
+            services.AddSingleton(storage);
 
-            services.AddBot<MyBot>(options => {
-                options.Middleware.Add(new AutoSaveStateMiddleware(state));
-            });
+            services.AddBot<HrBot>();
             
             services.AddBotApplicationInsights(botConfig);
             
