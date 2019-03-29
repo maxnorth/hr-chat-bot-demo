@@ -1,0 +1,57 @@
+{
+    "name": "HrBot",
+    "description": "",
+    "services": [
+        {
+            "type": "endpoint",
+            "appId": "",
+            "appPassword": "",
+            "endpoint": "http://localhost:5000/api/messages",
+            "id": "2270da70-49cf-11e9-9e5c-2d41c696d712",
+            "name": "HrBot"
+        },
+        {
+            "type": "cosmosdb",
+            "id": "35",
+            "name": "CosmosStorage",
+            "endpoint":"https://localhost:8081",
+            "key": "C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==",
+            "database": "HrBot",
+            "collection": "HrBotStorage"
+        },
+        {
+            "type": "appInsights",
+            "name": "appinsightsService",
+            "tenantId": "a6da4e16-b382-4475-9ee1-1617bdda5b04",
+            "subscriptionId": "cd7267f6-3dfe-4cce-890e-bb35cc8c4bbc",
+            "resourceGroup": "bot-framework-tour",
+            "serviceName": "bot-framework-touri5r2co",
+            "instrumentationKey": "0a7b177c-c885-47aa-8013-4ab72002cbaf",
+            "apiKeys": {},
+            "id": "81"
+        },
+        {
+            "type": "luis",
+            "id": "34",
+            "name": "LuisModel",
+            "appId": "1b6d41ca-3509-4a02-b12d-2b8d1e40af9f",
+            "authoringKey": "268c1ebb4bd7477e9937dfa7ffa61cf4",
+            "region": "eastus2",
+            "subscriptionKey": "4acb77add0424800b77e13eab8819ee3",
+            "version": "0.1"
+        },
+        {
+            "type": "qna",
+            "name": "QnAMaker",
+            "kbId": "84af782d-8484-4508-9e8a-f2bb20508e02",
+            "subscriptionKey": "",
+            "endpointKey": "01d4912d-4484-40a0-b776-72bf5438c122",
+            "hostname": "https://bot-framework-tour-qna.azurewebsites.net",
+            "id": "117"
+        }
+    ],
+    "padlock": "",
+    "version": "2.0",
+    "path": "C:\\Users\\maxwe\\Documents\\Projects\\dotnet\\ais-hr-bot-demo\\HrBot\\HrBot.bot",
+    "overrides": null
+}
