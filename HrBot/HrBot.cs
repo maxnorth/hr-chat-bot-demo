@@ -51,9 +51,9 @@ namespace HrBot
 
                 var dialogTurnResult = await dialogContext.ContinueDialogAsync(cancellationToken);
 
-                if (dialogTurnResult.Status == DialogTurnStatus.Waiting)
+                if (dialogTurnResult.Status == DialogTurnStatus.Waiting || dialogTurnResult.Status == DialogTurnStatus.Complete)
                 {
-                    // actively engaged in dialog, wait for response
+                    // actively engaged in dialog, or last response completed dialog. can return immediately.
                     return;
                 }
 

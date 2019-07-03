@@ -47,7 +47,7 @@ namespace HrBot
             services.AddSingleton(state);
 
             services.AddBot<HrBot>(options => {
-                options.Middleware.Add(new AutoSaveStateMiddleware());
+                options.Middleware.Add(new AutoSaveStateMiddleware(state));
             });
             
             services.AddBotApplicationInsights(botConfig);
