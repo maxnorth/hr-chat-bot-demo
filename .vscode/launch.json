@@ -10,9 +10,9 @@
             "request": "launch",
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/HrBot/bin/Debug/netcoreapp2.1/HrBot.dll",
+            "program": "${workspaceFolder}/AisBot/bin/Debug/netcoreapp2.1/AisBot.dll",
             "args": [],
-            "cwd": "${workspaceFolder}/HrBot",
+            "cwd": "${workspaceFolder}/AisBot",
             "stopAtEntry": false,
             "launchBrowser": {
                 "enabled": false
